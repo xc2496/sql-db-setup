@@ -12,10 +12,10 @@ output: html_document
 library(DBI)
 library(RMySQL)
 
-db_user <- 'admin'
-db_password <- 'testsql!'
-db_name <- 'oudb'
-db_host <- 'sqltest.clh43re5lq5h.us-east-1.rds.amazonaws.com'
+db_user <- 'xc2496'
+db_password <- '1995Susan'
+db_name <- 'SQLdb_Susan'
+db_host <- 'database-1.c6li2rgjuaa1.us-east-2.rds.amazonaws.com'
 db_port <- 3306
 
 mydb <- dbConnect(MySQL(), user = db_user, password = db_password, dbname = db_name, host = db_host, port = db_port)
@@ -50,10 +50,30 @@ dbListTables(mydb)
 
 #Read a particular table
 dbReadTable(mydb, 'studentInfo')
-
+#We will use the real SQL language
 #EXERCISE 1
 #Make two toy data sets with at least three variables and at least 30 rows each in them. Have a mix of numeric and character variables. Transfer these dataframes to your SQL database using the DBI commands. Name the tables whatever you like.
-
+#Create two random tables
+set.seed(123)
+words<-c("A","B","C")
+words <- sample(words,50,replace = TRUE)
+age <- sample(1:100, 50, replace=TRUE)
+happiness <- sample(1:100, 50, replace=TRUE)
+toy1<- data.frame(words,age, happiness)
+toy1
+set.seed(233)
+words<-c("A","B","C")
+words <- sample(words,50,replace = TRUE)
+age <- sample(1:100, 50, replace=TRUE)
+happiness <- sample(1:100, 50, replace=TRUE)
+toy2<- data.frame(words,age, happiness)
+toy2
+#Transfer these dataframes to your SQL database using the DBI commands. Name the tables into Toy1 and Toy2.
+#dbWriteTable(mydb, "Toy1", toy1)
+#dbWriteTable(mydb, "Toy2", toy2)
+#use "overwrite=TRUE" to update the table into sql
+dbListTables(mydb)
+dbListTables(mydb,"studentInfo")
 ```
 
 ## Getting into SQL - READING
@@ -65,7 +85,7 @@ dbGetQuery(mydb, "SELECT * FROM studentInfo ORDER BY id_student LIMIT 10;")
 
 dbGetQuery(mydb, "SELECT id_student, gender FROM studentInfo ORDER BY id_student DESC LIMIT 10;") #Order listed will be reflected in order in table
 
-dbGetQuery(mydb, "SELECT id_student AS 'Student ID', gender FROM studentInfo LIMIT 10;") #SQL Standard says quotes for literal strings and double quotes for everything else but that conflicts with R
+dbGetQuery(mydb, "SELECT id_student AS 'Student ID', gender FROM studentInfo LIMIT 10;") #SQL Standard says quotes for literal strings and double quotes for everything else but that conflicts with R. You can change variable names by using "AS".
 
 #Count the number of rows
 dbGetQuery(mydb, "SELECT COUNT(*) FROM studentAssessment;")
@@ -81,7 +101,7 @@ dbGetQuery(mydb, "SELECT COUNT(*) FROM studentAssessment WHERE score > 50 AND id
 
 #EXERCISE 2
 #Read one of your toy data tables, make sure the output is ordered in descending order, you rename one of the variables and the output is limited to the first 20 rows.
-
+dbGetQuery(mydb, "SELECT age, happiness, words AS 'grade' FROM Toy1 ORDER BY age DESC LIMIT 20;")
 #Read the other table according to a condition of one of the variables.
 
 ```
@@ -122,7 +142,14 @@ dbGetQuery(mydb, "SELECT * FROM studentAssessment ORDER BY id_student LIMIT 10;"
 #EXERCISE 3
 #Insert a new row in one of your toy data tables leaving one variable empty. Change one value in your other table. Display your new tables. Delete the row you edited and the row you inserted. 
 
-
+dbGetQuery(mydb, "INSERT INTO Toy1 (age) VALUES (95);")
+dbGetQuery(mydb, "UPDATE Toy2 SET age = '20' WHERE happiness=10 ;")
+dbGetQuery(mydb, "SELECT * FROM Toy1;")
+dbGetQuery(mydb, "SELECT * FROM Toy2;")
+dbGetQuery(mydb, "DELETE FROM Toy1 WHERE happiness is NULL;")
+dbGetQuery(mydb, "DELETE FROM Toy2 WHERE happiness=10;")
+dbGetQuery(mydb, "SELECT * FROM Toy1;")
+dbGetQuery(mydb, "SELECT * FROM Toy2;")
 ```
 
 ## Add/Deleting Table
@@ -143,7 +170,7 @@ dbGetQuery(mydb, "INSERT INTO test VALUES ( 9, 'Frank' );")
 dbGetQuery(mydb, "SELECT * FROM test;")
 
 #Inserting a NULL row
-dbGetQuery(mydb, "INSERT INTO test DEFAULT VALUES;")
+#dbGetQuery(mydb, "INSERT INTO test DEFAULT VALUES;")
 
 dbGetQuery(mydb,"INSERT INTO test (score, student) SELECT score, id_student FROM studentAssessment;")
 
